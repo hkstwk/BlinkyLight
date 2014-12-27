@@ -14,6 +14,7 @@
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "main.h"
 
@@ -48,20 +49,17 @@ void ioinit()
 
 	// Set timer 1 at 1.3kHz as frame buffer interrupt
 	// using 256 prescaler and arduino clock frequency of 1.6MHz
-	TCCR1A = 0; // set entire TCCR1A register to 0
-	TCCR1B = 0;
-	TCNT1 = 0;  // initialize counter to 0
-	//OCR1A = 48; // compare match register = ((16*10^6) / (256*1300)) - 1 (must be <65536)
-	OCR1A = 1024; // somewhat slower, so you can see the effect. Uncomment this one, and comment the line above.
+	TCCR2A = 0; // set entire TCCR1A register to 0
+	TCCR2B = 0;
+	TCNT2 = 0;  // initialize counter to 0
+	//OCR2A = 48; // compare match register = ((16*10^6) / (256*1300)) - 1 (must be <65536)
+	OCR2A = 255; // somewhat slower, so you can see the effect. Uncomment this one, and comment the line above.
 
 	// Turn on CTC mode
-	TCCR1B |= (1 << WGM12);
-
-	// Set CS12 bit for 256 prescaler
-	TCCR1B |= (1 << CS12);
+	TCCR2B |= (1 << WGM22);
 
 	// enable timer compare interrupt
-	TIMSK1 |= (1 << OCIE1A);
+	TIMSK2 |= (1 << OCIE2A);
 
 	//
 	sei();
@@ -72,4 +70,5 @@ ISR(TIMER1_COMPA_vect)
 	// Toggle port PB4 LOW to HIGH
 	// Not really necessary, but helps to show POV when
 	PORTB ^= (1 << 4);
+
 }
