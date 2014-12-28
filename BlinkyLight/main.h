@@ -11,6 +11,6 @@
 void ioinit();
 ISR(TIMER1_COMPA_vect);
 
-static const int DELAY = 1000;
+static const int DELAY = 100;
 
 #endif /* MAIN_H_ */
