@@ -1,74 +1,78 @@
-/*
- * main.c
- *
- *  Created on: 24 dec. 2014
- *      Author: harm
- */
+// this code sets up counter1 A output at 25% and B output at 75%
+// using ICR1 as top (16bit), Fast PWM.
 
 
-#define F_CPU 16000000UL
+//#include <avr/io.h>
+//
+//
+//int main(void)
+//{
+//    DDRB |= (1 << DDB1)|(1 << DDB2);
+//    // PB1 and PB2 is now an output
+//
+//    OCR1A = 0xFFFF;
+//    OCR1B = 0xFFFF;
+//    // set TOP to 16bit
+//
+//    OCR1A = 0x3FFF;
+//    // set PWM for 25% duty cycle @ 16bit
+//
+//    OCR1B = 0xBFFF;
+//    // set PWM for 75% duty cycle @ 16bit
+//
+//    TCCR1A |= (1 << COM1A1)|(1 << COM1B1);
+//    // set none-inverting mode
+//
+//    TCCR1A |= (1 << WGM11);
+//    TCCR1B |= (1 << WGM12)|(1 << WGM13);
+//    // set Fast PWM mode using ICR1 as TOP
+//
+//    TCCR1B |= (1 << CS10);
+//    // START the timer with no prescaler
+//
+//
+//
+//    while (1);
+//    {
+//        // we have a working Fast PWM
+//    }
+//}
+
+// this code sets up counter0 for an 8kHz Fast PWM wave @ 16Mhz Clock
+
 
 #include <avr/io.h>
 #include <util/delay.h>
 
-#include <avr/pgmspace.h>
-#include <avr/interrupt.h>
-#include <stdlib.h>
-#include <stdbool.h>
 
-#include "main.h"
-
-int
-main (void)
+int main(void)
 {
-	// This function initiates IO ports, timers and interrupts
-	ioinit();
+    DDRD |= (1 << DDD6);
+    // PD6 is now an output
 
-	// Do awesome effects. Loop forever.
-    while(1)
+    OCR0A = 128;
+    // set PWM for 50% duty cycle
+
+
+    TCCR0A |= (1 << COM0A1);
+    // set none-inverting mode
+
+    TCCR0A |= (1 << WGM01) | (1 << WGM00);
+    // set fast PWM Mode
+
+    TCCR0B |= (1 << CS01);
+    // set prescaler to 8 and starts PWM
+
+
+    while (1);
     {
-        PORTB ^= (1 << PB1);
-		_delay_ms(DELAY);
-		PORTB = 0;
-		PORTB ^= (1 << PB3);
-		_delay_ms(DELAY);
-		PORTB = 0;
-		PORTB ^= (1 << PB2);
-		_delay_ms(DELAY);
-		PORTB = 0;
+        // we have a working Fast PWM
+    	if (OCR0A > 0) {
+    		OCR0A--;
+    	}
+    	else {
+    		OCR0A = 255;
+    	}
+    	_delay_ms(100);
     }
-}
-
-void ioinit()
-{
-	// Set all ports to output and pull all pins low.
-	DDRB = 0xff;
-	DDRC = 0xff;
-	DDRD = 0xff;
-	PORTB = 0xff; // all pins high
-
-	// Set timer 1 at 1.3kHz as frame buffer interrupt
-	// using 256 prescaler and arduino clock frequency of 1.6MHz
-	TCCR2A = 0; // set entire TCCR1A register to 0
-	TCCR2B = 0;
-	TCNT2 = 0;  // initialize counter to 0
-	//OCR2A = 48; // compare match register = ((16*10^6) / (256*1300)) - 1 (must be <65536)
-	OCR2A = 255; // somewhat slower, so you can see the effect. Uncomment this one, and comment the line above.
-
-	// Turn on CTC mode
-	TCCR2B |= (1 << WGM22);
-
-	// enable timer compare interrupt
-	TIMSK2 |= (1 << OCIE2A);
-
-	//
-	sei();
-}
-
-ISR(TIMER1_COMPA_vect)
-{
-	// Toggle port PB4 LOW to HIGH
-	// Not really necessary, but helps to show POV when
-	PORTB ^= (1 << 4);
-
 }
